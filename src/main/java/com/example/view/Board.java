@@ -1,8 +1,8 @@
-package main.java.com.example.view;
+package com.example.view;
 
-import main.java.com.example.model.ActiveFigure;
-import main.java.com.example.model.GameState;
-import main.java.com.example.model.Model;
+import com.example.model.ActiveFigure;
+import com.example.model.GameState;
+import com.example.model.Model;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,84 +12,28 @@ import java.beans.PropertyChangeListener;
 public class Board extends JPanel implements PropertyChangeListener {
     private final Model model;
     private GameState gameState;
+    public static final int width = Model.boardWidth * 30;
+    public static final int height = Model.boardHeight * 30;
 
-    public static final int width = Model.boardWidth * Config.SIZE;
-    public static final int height = Model.boardHeight * Config.SIZE;
-
-    public Board(Model model) {
+    public Board(Model model){
         this.model = model;
-        this.gameState = new GameState(new int[Model.boardHeight][Model.boardWidth], null, 0);
+        this.gameState = new GameState(
+                new int[Model.boardHeight][Model.boardWidth], null, 0);
         setBounds(0, 0, width, height);
         setBackground(Color.WHITE);
         model.addPropertyChangeListener(this);
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if ("modelUpdated".equals(evt.getPropertyName()) && evt.getNewValue() instanceof GameState state) {
-            System.out.println("GameState figure: " + (state.getFigure() != null) +
-                    ", Position: " + (state.getFigure() != null ? state.getFigure().getPosition() : "null"));
-            this.gameState = state;
-            repaint();
-        }
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        drawFigure(gameState.getFigure(), g);
-        drawBackground(g);
-    }
-
-    private void drawFigure(ActiveFigure figure, Graphics g) {
-        if (figure == null) {
-            System.out.println("Figure is null, skipping draw");
-            return;
-        }
-        int[][] shape = figure.getShape();
-        System.out.println("Drawing figure at x=" + figure.getPosition().x() + ", y=" + figure.getPosition().y() +
-                ", shape=");
-        for (int y = 0; y < figure.getHeight(); y++) {
-            for (int x = 0; x < figure.getWidth(); x++) {
-                System.out.print(shape[y][x] + " ");
-            }
-            System.out.println();
-        }
-        for (int x = 0; x < figure.getWidth(); x++) {
-            for (int y = 0; y < figure.getHeight(); y++) {
-                if (shape[y][x] == 1) {
-                    int coordX = x + figure.getPosition().x();
-                    int coordY = y + figure.getPosition().y();
-                    System.out.println("Drawing cell at coordX=" + coordX + ", coordY=" + coordY);
-                    drawCell(getColorFromCode(figure.getColorCode()), coordX, coordY, g);
-                }
-            }
-        }
-    }
-
     private void drawCell(Color color, int coordX, int coordY, Graphics g) {
-        if (coordY < 0 || coordY >= Model.boardHeight) {
-            System.out.println("Skipping cell at coordX=" + coordX + ", coordY=" + coordY + " (out of bounds)");
+        if (coordY < 0 || coordY >= Model.boardHeight)
             return;
-        }
         g.setColor(color);
-        g.fillRect(coordX * Config.SIZE, coordY * Config.SIZE, Config.SIZE, Config.SIZE);
+        g.fillRect(coordX * 30, coordY * 30, 30, 30);
         g.setColor(Color.BLACK);
-        g.drawRect(coordX * Config.SIZE, coordY * Config.SIZE, Config.SIZE, Config.SIZE);
+        g.drawRect(coordX * 30, coordY * 30, 30, 30);
     }
 
-    private void drawBackground(Graphics g) {
-        int[][] field = gameState.getField();
-        for (int x = 0; x < Model.boardWidth; x++) {
-            for (int y = 0; y < Model.boardHeight; y++) {
-                if (field[y][x] != 0) {
-                    drawCell(getColorFromCode(field[y][x]), x, y, g);
-                }
-            }
-        }
-    }
-
-    private Color getColorFromCode(int colorCode) {
+    private Color getColorFromCode(int colorCode){
         return switch (colorCode) {
             case 1 -> Color.CYAN;
             case 2 -> Color.BLUE;
@@ -100,5 +44,41 @@ public class Board extends JPanel implements PropertyChangeListener {
             case 7 -> Color.MAGENTA;
             default -> Color.WHITE;
         };
+    }
+
+    private void drawFigure(ActiveFigure activeFigure, Graphics g){
+        if (activeFigure == null)
+            return;
+        int[][] shape = activeFigure.getShape();
+        for (int y = 0; y < activeFigure.getHeight(); y++)
+            for (int x = 0; x < activeFigure.getWidth(); x++)
+                if (shape[y][x] == 1) {
+                    int coordX = x + activeFigure.getPosition().x();
+                    int coordY = y + activeFigure.getPosition().y();
+                    drawCell(getColorFromCode(activeFigure.getColorCode()), coordX, coordY, g);
+                }
+    }
+
+    private void drawBackground(Graphics g){
+        int[][] field = gameState.getField();
+        for (int y = 0; y < Model.boardHeight; y++)
+            for (int x = 0; x < Model.boardWidth; x++)
+                if (field[y][x] != 0)
+                    drawCell(getColorFromCode(field[y][x]), x, y, g);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("modelUpdated".equals(evt.getPropertyName()) && evt.getNewValue() instanceof GameState state) {
+            this.gameState = state;
+            repaint();
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        drawBackground(g);
+        drawFigure(gameState.getFigure(), g);
     }
 }

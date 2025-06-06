@@ -1,6 +1,6 @@
-package main.java.com.example.model;
+package com.example.model;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Random;
 
 public enum Figure {
@@ -31,17 +31,17 @@ public enum Figure {
     T4(7, Color.PINK, new int[][]{{0, 1}, {1, 1}, {0, 1}});
 
     private final int colorCode;
-    private final Color color;
     private final int[][] shape;
-    private final int height;
+    private final Color color;
     private final int width;
+    private final int height;
 
     Figure(int colorCode, Color color, int[][] shape) {
         this.colorCode = colorCode;
         this.color = color;
         this.shape = shape;
-        this.height = shape.length;
         this.width = shape[0].length;
+        this.height = shape.length;
     }
 
     public Figure turnRight() {
@@ -68,33 +68,20 @@ public enum Figure {
         };
     }
 
-    public Figure turnLeft() {
-        return this.turnRight().turnRight().turnRight();
-    }
-
-    private static final Random RANDOM = new Random();
-
-    public static Figure getRandomFigure() {
+    public static final Random RANDOM = new Random();
+    public static Figure getRandomFigure(){
         return values()[RANDOM.nextInt(values().length)];
     }
-
-    public int[][] getShape() {
+    public int[][]getShape(){
         return shape;
     }
-
-    public int getColorCode() {
+    public int getColorCode(){
         return colorCode;
     }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public int getHeight() {
+    public int getHeight(){
         return height;
     }
-
-    public int getWidth() {
+    public int getWidth(){
         return width;
     }
 }

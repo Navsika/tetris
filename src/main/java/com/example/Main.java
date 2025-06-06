@@ -1,24 +1,35 @@
-package main.java.com.example;
+package com.example;
 
-import main.java.com.example.controller.Controller;
-import main.java.com.example.model.Model;
-import main.java.com.example.view.ConsoleView;
-import main.java.com.example.view.Window;
+import com.example.contorller.Controller;
+import com.example.model.Model;
+import com.example.view.ConsoleView;
+import com.example.view.Window;
+
+import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
+        boolean useConsole = false;
+
+        for (String arg : args) {
+            if (arg.equalsIgnoreCase("--console")) {
+                useConsole = true;
+                break;
+            }
+        }
+
         Model model = new Model();
         Controller controller = new Controller(model);
 
-        boolean consoleMode = args.length > 0 && args[0].equalsIgnoreCase("--console");
-
-        if (consoleMode) {
+        if (useConsole) {
             ConsoleView consoleView = new ConsoleView(model, controller);
-            controller.setConsoleView(consoleView);
             consoleView.initialize();
         } else {
-            Window window = new Window(model, controller);
-            controller.setWindow(window);
+            SwingUtilities.invokeLater(() -> {
+                Window window = new Window(model, controller);
+                window.getRootPane().setFocusTraversalKeysEnabled(false);
+                window.setVisible(true);
+            });
         }
     }
 }

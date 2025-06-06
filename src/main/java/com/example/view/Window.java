@@ -1,8 +1,8 @@
-package main.java.com.example.view;
+package com.example.view;
 
-import main.java.com.example.controller.Controller;
-import main.java.com.example.model.Model;
-import main.java.com.example.model.PlayerScore;
+import com.example.contorller.Controller;
+import com.example.model.Model;
+import com.example.model.PlayerScore;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,24 +12,24 @@ import java.util.List;
 
 public class Window extends JFrame implements PropertyChangeListener {
     private final Model model;
-    private final Controller controller;
-
+    private Controller controller;
     private GamePanel gamePanel;
     private AboutPanel aboutPanel;
     private MainMenu menuPanel;
     private LeaderBoard leaderBoardPanel;
-    public static final int width = Model.boardWidth * Config.SIZE * 2;
-    public static final int height = Model.boardHeight * Config.SIZE;
+    public static final int width = Model.boardWidth * 30 * 2;
+    public static final int height = Model.boardHeight * 30;
+
     private int totalWidth;
     private int totalHeight;
 
-    public Window(Model inputModel, Controller inputController) {
+    public Window(Model inputModel, Controller inputController){
         this.model = inputModel;
         this.controller = inputController;
         initialize();
     }
 
-    public void initialize() {
+    public void initialize(){
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         pack();
         setTitle("Tetris");
@@ -44,14 +44,21 @@ public class Window extends JFrame implements PropertyChangeListener {
 
         model.addPropertyChangeListener(this);
 
-        leaderBoardPanel = new LeaderBoard(controller);
         menuPanel = new MainMenu(controller);
         aboutPanel = new AboutPanel(controller);
+        leaderBoardPanel = new LeaderBoard(controller);
 
         add(leaderBoardPanel);
-        add(menuPanel);
         add(aboutPanel);
+        add(menuPanel);
         revalidate();
+        model.openMenu();
+    }
+
+    private void clean(Component component){
+        if (component != null){
+            component.setVisible(false);
+        }
     }
 
     @Override
@@ -60,25 +67,25 @@ public class Window extends JFrame implements PropertyChangeListener {
             case "gameStarted" -> SwingUtilities.invokeLater(this::startGame);
             case "menuOpened" -> SwingUtilities.invokeLater(this::showMenu);
             case "aboutOpened" -> SwingUtilities.invokeLater(this::showAbout);
-            case "leaderBoardOpened" -> SwingUtilities.invokeLater(this::showAbout);
-
+            case "leaderBoardOpened" -> SwingUtilities.invokeLater(this::showLeaderBoard);
             case "leaderBoardUpdated" -> {
-                if (evt.getNewValue() instanceof List<?> list) {
-                    @SuppressWarnings("unchecked")
-                    List<PlayerScore> leaderBoard = (List<PlayerScore>) list;
+                if (evt.getNewValue() instanceof java.util.List<?> list) {
+                    java.util.List<PlayerScore> leaderBoard = (List<PlayerScore>) list;
                     SwingUtilities.invokeLater(() -> {
                         leaderBoardPanel.updateLeaderBoard(leaderBoard);
                     });
                 }
             }
             case "gameOver" -> SwingUtilities.invokeLater(this::gameOver);
+
         }
     }
 
-    public void showMenu() {
+    public void showMenu(){
         clean(gamePanel);
         clean(leaderBoardPanel);
         clean(aboutPanel);
+
         menuPanel.setVisible(true);
         repaint();
         menuPanel.setFocusable(true);
@@ -86,8 +93,9 @@ public class Window extends JFrame implements PropertyChangeListener {
     }
 
     public void showAbout() {
-
         clean(menuPanel);
+        clean(gamePanel);
+        clean(leaderBoardPanel);
 
         aboutPanel.setVisible(true);
         repaint();
@@ -95,8 +103,10 @@ public class Window extends JFrame implements PropertyChangeListener {
         aboutPanel.requestFocusInWindow();
     }
 
-    public void showLeaderboard() {
+    public void showLeaderBoard() {
         clean(menuPanel);
+        clean(gamePanel);
+        clean(aboutPanel);
 
         leaderBoardPanel.setVisible(true);
         repaint();
@@ -104,8 +114,10 @@ public class Window extends JFrame implements PropertyChangeListener {
         leaderBoardPanel.requestFocusInWindow();
     }
 
-    public void startGame() {
+    public void startGame(){
         clean(menuPanel);
+        clean(aboutPanel);
+        clean(leaderBoardPanel);
 
         gamePanel = new GamePanel(this);
         add(gamePanel);
@@ -115,19 +127,14 @@ public class Window extends JFrame implements PropertyChangeListener {
         gamePanel.requestFocusInWindow();
     }
 
-    public void gameOver() {
+    public void gameOver(){
         String playerName = JOptionPane.showInputDialog(this, "Game over :)\nPlease enter your name.");
-        controller.updateLeaderBoard(playerName);
-        dispose();
+        if (playerName != null && !playerName.trim().isEmpty())
+            controller.updateLeaderBoard(playerName);
+        model.openMenu();
     }
 
-    private void clean(Component object) {
-        if (object != null) {
-            object.setVisible(false);
-        }
-    }
-
-    public static JButton createStyledButton(String text) {
+    public static JButton createStyledButton(String text){
         JButton button = new JButton(text);
         button.setFont(new Font("Arial", Font.BOLD, 24));
         button.setFocusPainted(false);
@@ -144,11 +151,7 @@ public class Window extends JFrame implements PropertyChangeListener {
         return controller;
     }
 
-    public int getTotalHeight() {
-        return totalHeight;
-    }
-
-    public int getTotalWidth() {
-        return totalWidth;
+    public void setController(Controller controller){
+        this.controller = controller;
     }
 }

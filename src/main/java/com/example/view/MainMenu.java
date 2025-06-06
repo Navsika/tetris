@@ -1,23 +1,24 @@
-package main.java.com.example.view;
+package com.example.view;
 
-import main.java.com.example.controller.Controller;
+import com.example.contorller.Controller;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static main.java.com.example.view.Window.createStyledButton;
+import static com.example.view.Window.createStyledButton;
 
-public class MainMenu extends JPanel {
+public class MainMenu extends JPanel{
     private Controller controller;
     private final JButton newGameButton;
     private final JButton leaderBoardButton;
     private final JButton aboutButton;
     private final JButton exitButton;
 
-    public MainMenu(Controller controller) {
+    public MainMenu(Controller controller){
+        this.controller = controller;
         setLayout(null);
-        setBounds(0, 0, Window.width, Window.height);
-        setOpaque(true); // panel not unvisible (has color)
+        setBounds(0, 0, com.example.view.Window.width, com.example.view.Window.height);
+        setOpaque(true);
         setBackground(new Color(50, 110, 160));
 
         int buttonWidth = 200;
@@ -27,8 +28,8 @@ public class MainMenu extends JPanel {
         int startY = 150;
 
         newGameButton = createStyledButton("New Game");
-        newGameButton.setBounds(x, startY, buttonWidth, buttonHeight);
-
+        newGameButton.setBounds(x, startY,
+                buttonWidth, buttonHeight);
         leaderBoardButton = createStyledButton("Leaderboard");
         leaderBoardButton.setBounds(x, startY + buttonHeight + gap,
                 buttonWidth, buttonHeight);
@@ -41,8 +42,8 @@ public class MainMenu extends JPanel {
         exitButton.setBounds(x, startY + 3*(buttonHeight + gap),
                 buttonWidth, buttonHeight);
 
-        newGameButton.addActionListener(e->controller.startGame());
-        leaderBoardButton.addActionListener(e->controller.showLeaderboard());
+        newGameButton.addActionListener(e -> controller.startGame());
+        leaderBoardButton.addActionListener(e->controller.showLeaderBoard());
         aboutButton.addActionListener(e->controller.showAbout());
         exitButton.addActionListener(e->System.exit(0));
 
@@ -51,9 +52,5 @@ public class MainMenu extends JPanel {
         add(aboutButton);
         add(exitButton);
         revalidate();
-    }
-
-    public void setController(Controller controller) {
-        this.controller = controller;
     }
 }
